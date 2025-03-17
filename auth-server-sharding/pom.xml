@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>quincy-auth-server-sharding-java21</artifactId>
+	<name>Auth-Server Sharding</name>
+	<url>https://github.com/mq7253180/sdk/tree/master/auth-server</url>
+	<parent>
+		<groupId>com.quincy</groupId>
+		<artifactId>sdk-java21</artifactId>
+		<version>2.0.0</version>
+	</parent>
+	<dependencies>
+		<dependency>
+		    <groupId>com.quincy</groupId>
+		    <artifactId>quincy-jdbc-sharding-java21</artifactId>
+		    <version>2.0.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.quincy</groupId>
+		    <artifactId>quincy-auth-server-java21</artifactId>
+		    <version>2.0.0</version>
+		</dependency>
+    </dependencies>
+</project>
