@@ -41,7 +41,8 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 	private PublicKeyGetter publicKeyGetter;
 	@Autowired
 	private VCodeController vCodeInterceptor;
-	private final static String[] EXCLUDE_PATH_PATTERNS = new String[] {"/static/**", "/vcode/**", "/auth/**", "/failure", "/success", "/swagger-ui.html", "/springdoc/swagger-ui.html"};
+	private final static String[] EXCLUDE_PATH_PATTERNS = new String[] {"/static/**", "/vcode/**", "/auth/**", "/failure", "/success", 
+			"/**/swagger-ui.html", "/swagger-ui/index.html", "/v3/api-docs/**"};
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
