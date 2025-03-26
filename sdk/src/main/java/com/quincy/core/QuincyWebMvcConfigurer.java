@@ -1,5 +1,7 @@
 package com.quincy.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -41,8 +43,10 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 	private PublicKeyGetter publicKeyGetter;
 	@Autowired
 	private VCodeController vCodeInterceptor;
-	private final static String[] EXCLUDE_PATH_PATTERNS = new String[] {"/static/**", "/vcode/**", "/auth/**", "/failure", "/success", 
-			"/**/swagger-ui.html", "/swagger-ui/index.html", "/v3/api-docs/**"};
+	@Value("#{'${uris.interceptor-exclusion}'.split(',')}")
+	private String[] flexibleExclusionUris;
+	private final static String[] FIXED_EXCLUSION_PATH_PATTERN_S = new String[] {"/static/**", "/vcode/**", "/auth/**", "/failure", "/success"};
+	private static String[] EXCLUSION_PATH_PATTERN_S = null;
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
@@ -54,30 +58,50 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 			CustomizedBeforeAuthInterceptor annotation = interceptor.getClass().getDeclaredAnnotation(CustomizedBeforeAuthInterceptor.class);
 			InterceptorRegistration registration = registry.addInterceptor((HandlerInterceptor)interceptor)
 					.addPathPatterns(annotation.pathPatterns())
-					.excludePathPatterns(EXCLUDE_PATH_PATTERNS)
+					.excludePathPatterns(getExclusionPathPattens())
 					.order(annotation.order());
 			String[] excludePathPatterns = annotation.excludePathPatterns();
 			if(excludePathPatterns!=null&&excludePathPatterns.length>0)
 				registration.excludePathPatterns(excludePathPatterns);
 		}
 		if(publicKeyGetter!=null)
-			registry.addInterceptor(new SignatureInterceptor(publicKeyGetter)).addPathPatterns("/**").excludePathPatterns(EXCLUDE_PATH_PATTERNS);
-		registry.addInterceptor(vCodeInterceptor).addPathPatterns("/**").excludePathPatterns(EXCLUDE_PATH_PATTERNS);
+			registry.addInterceptor(new SignatureInterceptor(publicKeyGetter)).addPathPatterns("/**").excludePathPatterns(getExclusionPathPattens());
+		registry.addInterceptor(vCodeInterceptor).addPathPatterns("/**").excludePathPatterns(getExclusionPathPattens());
 		if(quincyAuthInterceptor!=null) {
 			HandlerInterceptorAdapter handlerInterceptorAdapter = (HandlerInterceptorAdapter)quincyAuthInterceptor;
-			registry.addInterceptor(handlerInterceptorAdapter).addPathPatterns("/**").excludePathPatterns(EXCLUDE_PATH_PATTERNS);
+			registry.addInterceptor(handlerInterceptorAdapter).addPathPatterns("/**").excludePathPatterns(getExclusionPathPattens());
 		}
 		map = applicationContext.getBeansWithAnnotation(CustomizedInterceptor.class);
 		for(Object interceptor:map.values()) {
 			CustomizedInterceptor annotation = interceptor.getClass().getDeclaredAnnotation(CustomizedInterceptor.class);
 			InterceptorRegistration registration = registry.addInterceptor((HandlerInterceptor)interceptor)
 					.addPathPatterns(annotation.pathPatterns())
-					.excludePathPatterns(EXCLUDE_PATH_PATTERNS)
+					.excludePathPatterns(getExclusionPathPattens())
 					.order(annotation.order());
 			String[] excludePathPatterns = annotation.excludePathPatterns();
 			if(excludePathPatterns!=null&&excludePathPatterns.length>0)
 				registration.excludePathPatterns(excludePathPatterns);
 		}
+	}
+
+	private String[] getExclusionPathPattens() {
+		if(EXCLUSION_PATH_PATTERN_S==null) {
+			synchronized(FIXED_EXCLUSION_PATH_PATTERN_S) {
+				if(EXCLUSION_PATH_PATTERN_S==null) {
+					List<String> list = new ArrayList<>(FIXED_EXCLUSION_PATH_PATTERN_S.length+(flexibleExclusionUris==null?0:flexibleExclusionUris.length));
+					for(String uriPatten:FIXED_EXCLUSION_PATH_PATTERN_S)
+						list.add(uriPatten);
+					if(flexibleExclusionUris!=null&&flexibleExclusionUris.length>0) {
+						for(String _uriPatten:flexibleExclusionUris) {
+							String uriPatten = _uriPatten.trim();
+							list.add(uriPatten);
+						}
+					}
+					EXCLUSION_PATH_PATTERN_S = list.toArray(new String[] {});
+				}
+			}
+		}
+		return EXCLUSION_PATH_PATTERN_S;
 	}
 /*
 	private final static String SWAGGER = "classpath:/META-INF/resources/webjars/swagger-ui/4.15.5/index.html";
@@ -97,5 +121,18 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 		freemarkerCfg.setSharedVariable("i18n", new I18NTemplateDirectiveModelBean(applicationContext.getEnvironment()));
 		freemarkerCfg.setSharedVariable("property", new PropertiesTemplateDirectiveModelBean(applicationContext.getEnvironment()));
 		freemarkerCfg.setSharedVariable("locale", new LocaleTemplateDirectiveModelBean());
+    }
+   
+    public static void main(String[] args) {
+    	List<String> list = new ArrayList<>();
+    	list.add("aaa");
+    	list.add("bbb");
+    	list.add("ccc");
+    	list.add("ddd");
+    	list.add("eee");
+    	String[] ss = list.toArray(new String[] {"111", "222", "333"});
+    	for(String s:ss) {
+    		System.out.println("S---------------"+s);
+    	}
     }
 }
