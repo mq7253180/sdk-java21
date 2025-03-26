@@ -28,7 +28,7 @@ public class GlobalHandlerMethodReturnValueHandler implements HandlerMethodRetur
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
 		DoNotWrap doNotWrap = returnType.getMethod().getDeclaredAnnotation(DoNotWrap.class);
-		if(doNotWrap==null) {
+		if(doNotWrap==null||CommonHelper.getRequest().getRequestURI().startsWith("/v3/api-docs")) {
 			Result result = Result.newSuccess();
 			returnValue = result.msg(applicationContext.getMessage(Result.I18N_KEY_SUCCESS, null, CommonHelper.getLocale())).data(returnValue);
 		}
