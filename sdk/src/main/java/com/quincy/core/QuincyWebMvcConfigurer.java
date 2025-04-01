@@ -35,7 +35,7 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 	private ApplicationContext applicationContext;
 	@Value("${env}")
 	private String env;
-	@Value("${access-control-allow-origin}")
+	@Value("${access-control-allow-origin:#{null}}")
 	private String accessControlAllowOrigin;
 	@Autowired(required = false)
 	private QuincyAuthInterceptor quincyAuthInterceptor;
