@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import com.quincy.auth.dao.LoginUserMappingRepository;
+import com.quincy.auth.dao.LoginUserMappingDao;
 import com.quincy.auth.dao.UserDao;
 import com.quincy.auth.dao.UserRepository;
-import com.quincy.auth.entity.LoginUserMappingEntity;
+import com.quincy.auth.entity.LoginUserMapping;
 import com.quincy.auth.entity.Permission;
 import com.quincy.auth.entity.Role;
 import com.quincy.auth.entity.UserDto;
@@ -36,7 +36,7 @@ import com.quincy.sdk.o.User;
 @Service
 public class UserServiceImpl implements UserService {
 	@Autowired
-	protected LoginUserMappingRepository loginUserMappingRepository;
+	protected LoginUserMappingDao loginUserMappingDao;
 	@Autowired
 	protected UserRepository userRepository;
 	@Autowired
@@ -167,8 +167,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Long findUserId(String loginName) {
-		LoginUserMappingEntity loginUserMappingEntity = loginUserMappingRepository.findByLoginName(loginName);
-		return loginUserMappingEntity==null?null:loginUserMappingEntity.getUserId();
+		LoginUserMapping loginUserMapping = loginUserMappingDao.findByLoginName(loginName);
+		return loginUserMapping==null?null:loginUserMapping.getUserId();
 	}
 
 	@Override
@@ -237,8 +237,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public boolean createMapping(String loginName, Long userId) {
-		LoginUserMappingEntity po = loginUserMappingRepository.findByLoginName(loginName);
-		if(po!=null) {
+		LoginUserMapping loginUserMapping = loginUserMappingDao.findByLoginName(loginName);
+		if(loginUserMapping!=null) {
 			return false;
 		} else {
 			this.doCreateMapping(loginName, userId);
@@ -249,8 +249,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Long createMapping(String loginName) {
-		LoginUserMappingEntity po = loginUserMappingRepository.findByLoginName(loginName);
-		if(po!=null) {
+		LoginUserMapping loginUserMapping = loginUserMappingDao.findByLoginName(loginName);
+		if(loginUserMapping!=null) {
 			return null;
 		} else {
 			Long userId = utilsDao.selectAutoIncreament("b_user");
@@ -260,24 +260,20 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void doCreateMapping(String loginName, Long userId) {
-		LoginUserMappingEntity loginUserMappingEntity = new LoginUserMappingEntity();
-		loginUserMappingEntity.setUserId(userId);
-		loginUserMappingEntity.setLoginName(loginName);
-		loginUserMappingRepository.save(loginUserMappingEntity);
+		loginUserMappingDao.save(loginName, userId);
 	}
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public Result updateMapping(String oldLoginName, String newLoginName, UserUpdation userUpdation) {
-		LoginUserMappingEntity po = loginUserMappingRepository.findByLoginName(newLoginName);
-		if(po!=null)//验重
+		LoginUserMapping loginUserMapping = loginUserMappingDao.findByLoginName(newLoginName);
+		if(loginUserMapping!=null)//验重
 			return new Result(0, "auth.mapping.new");
-		po = loginUserMappingRepository.findByLoginName(oldLoginName);
-		Assert.notNull(po, "开发错误：旧手机号、邮箱、用户名不存在，请检查！");
-		po.setLoginName(newLoginName);
-		loginUserMappingRepository.save(po);
+		loginUserMapping = loginUserMappingDao.findByLoginName(oldLoginName);
+		Assert.notNull(loginUserMapping, "开发错误：旧手机号、邮箱、用户名不存在，请检查！");
+		loginUserMappingDao.updateLoginName(newLoginName, loginUserMapping.getId());
 		UserEntity vo = new UserEntity();
-		vo.setId(po.getUserId());
+		vo.setId(loginUserMapping.getUserId());
 		userUpdation.setLoginName(vo);
 		this.userRepository.save(vo);
 		return new Result(1, "status.success");
