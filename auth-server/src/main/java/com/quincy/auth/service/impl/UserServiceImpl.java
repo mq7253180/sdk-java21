@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UtilsDao utilsDao;
 	@Autowired
-	private UserDao userDao;
+	protected UserDao userDao;
 	@Autowired
 	private AuthServerActions authServerActions;
 
@@ -181,10 +181,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
 	public void updatePassword(Long userId, String password) {
-		UserEntity vo = new UserEntity();
-		vo.setId(userId);
-		vo.setPassword(password);
-		this.update(vo);
+		userDao.updatePassword(password, userId);
 	}
 
 	protected User toUser(UserDto entity, Client client) {
@@ -229,9 +226,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public Long add(UserEntity vo) {
-		UserEntity po = userRepository.save(vo);
-		return po.getId();
+	public Long add(UserDto vo) {
+		this.userDao.save(vo.getId(), vo.getUsername(), vo.getName(), vo.getGender(), vo.getPassword(), vo.getMobilePhone(), vo.getEmail(), vo.getAvatar());
+		return vo.getId();
 	}
 
 	@Override
@@ -282,5 +279,20 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteMappingAndUpdateUser(String oldLoginName, UserUpdation userUpdation, Long userId) {
 		throw new RuntimeException("此方法专门提供给分片库模式，单库模式下禁调此方法！");
+	}
+
+	@Override
+	public int updateJsessionidPcBrowser(Long id, String jsessionid) {
+		return userDao.updateJsessionidPcBrowser(jsessionid, id);
+	}
+
+	@Override
+	public int updateJsessionidMobileBrowser(Long id, String jsessionid) {
+		return userDao.updateJsessionidMobileBrowser(jsessionid, id);
+	}
+
+	@Override
+	public int updateJsessionidApp(Long id, String jsessionid) {
+		return userDao.updateJsessionidApp(jsessionid, id);
 	}
 }

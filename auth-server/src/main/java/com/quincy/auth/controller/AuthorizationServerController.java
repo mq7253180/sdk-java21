@@ -17,7 +17,6 @@ import com.quincy.core.VCodeConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quincy.auth.AuthConstants;
 import com.quincy.auth.SessionInvalidation;
-import com.quincy.auth.entity.UserEntity;
 import com.quincy.auth.service.UserService;
 import com.quincy.core.InnerConstants;
 import com.quincy.core.InnerHelper;
@@ -299,15 +298,12 @@ public class AuthorizationServerController {
 	}
 
 	private void updateLastLogin(Long userId, String jessionid, Client client) {
-		UserEntity vo = new UserEntity();
-		vo.setId(userId);
 		if(client.isPc())
-			vo.setJsessionidPcBrowser(jessionid);
+			userService.updateJsessionidPcBrowser(userId, jessionid);
 		if(client.isMobile())
-			vo.setJsessionidMobileBrowser(jessionid);
+			userService.updateJsessionidMobileBrowser(userId, jessionid);
 		if(client.isApp())
-			vo.setJsessionidApp(jessionid);
-		userService.update(vo);
+			userService.updateJsessionidApp(userId, jessionid);
 	}
 
 	@RequestMapping("/signup/vcode")
