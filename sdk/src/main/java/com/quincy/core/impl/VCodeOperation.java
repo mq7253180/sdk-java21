@@ -56,20 +56,20 @@ public class VCodeOperation implements VCodeOpsRgistry {
 		String msgI18NKey = null;
 		String msg = null;
 		if(inputedVCode==null) {
-			status = -25;
+			status = -5;
 			msgI18NKey = "vcode.null";
 		} else {
 			if(session==null) {
-				status = -26;
+				status = -6;
 				msgI18NKey = "vcode.expire";
 			} else {
 				Object _cachedVCode = session.getAttribute(attrKey);
 				String cachedVCode = _cachedVCode==null?null:CommonHelper.trim(_cachedVCode.toString());
 				if(cachedVCode==null) {
-					status = -26;
+					status = -6;
 					msgI18NKey = "vcode.expire";
 				} else if(!(ignoreCase?cachedVCode.equalsIgnoreCase(inputedVCode):cachedVCode.equals(inputedVCode))) {
-					status = -27;
+					status = -7;
 					msgI18NKey = "vcode.not_matched";
 				}
 			}
