@@ -137,7 +137,8 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 		if(!returnDto)
 			list = new ArrayList<>();
 		Map<String, Method> map = classMethodMap.get(returnItemType);
-		Assert.isTrue(map!=null, returnItemType.getName()+" must be marked by @DTO.");
+		if(!this.typeSupported(returnItemType)&&!byte[].class.isAssignableFrom(returnItemType))
+			Assert.isTrue(map!=null, returnItemType.getName()+" must be marked by @DTO.");
 		Connection conn = null;
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -154,9 +155,16 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 			}
 			rs = statement.executeQuery();
 			while(rs.next()) {
-				Object item = returnItemType.getDeclaredConstructor().newInstance();
-				for(int i=1;i<=columnCount;i++)
-					this.loadItem(map, item, rsmd, rs, i);
+				Object item = null;
+				if(this.typeSupported(returnType)) {
+					item = rs.getObject(1);
+				} else if(byte[].class.isAssignableFrom(returnType)) {
+					item = this.toBinary(rs, 1);
+				} else {
+					item = returnItemType.getDeclaredConstructor().newInstance();
+					for(int i=1;i<=columnCount;i++)
+						this.loadItem(map, item, rsmd, rs, i);
+				}
 				if(returnDto) {
 					return item;
 				} else
@@ -171,6 +179,24 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 			if(newConn&&conn!=null)
 				conn.close();
 		}
+	}
+
+	private boolean typeSupported(Class<?> type) {
+		return int.class.isAssignableFrom(type)||Integer.class.isAssignableFrom(type)||
+		long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||
+		String.class.isAssignableFrom(type)||
+		BigDecimal.class.isAssignableFrom(type)||
+		Date.class.isAssignableFrom(type)||
+		Timestamp.class.isAssignableFrom(type)||
+		Time.class.isAssignableFrom(type)||
+		float.class.isAssignableFrom(type)||Float.class.isAssignableFrom(type)||
+		double.class.isAssignableFrom(type)||Double.class.isAssignableFrom(type)||
+		boolean.class.isAssignableFrom(type)||Boolean.class.isAssignableFrom(type)||
+		byte.class.isAssignableFrom(type)||Byte.class.isAssignableFrom(type)||
+		short.class.isAssignableFrom(type)||Short.class.isAssignableFrom(type)||
+		Array.class.isAssignableFrom(type)||
+		Blob.class.isAssignableFrom(type)||
+		Clob.class.isAssignableFrom(type);
 	}
 
 	private void loadItem(Map<String, Method> map, Object item, ResultSetMetaData rsmd, ResultSet rs, int i) throws SQLException, IOException, IllegalAccessException, InvocationTargetException {
@@ -211,19 +237,23 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 				} else if(Clob.class.isAssignableFrom(parameterType)) {
 					v = rs.getClob(i);
 				} else if(byte[].class.isAssignableFrom(parameterType)) {
-					InputStream in = null;
-					try {
-						in = rs.getBinaryStream(i);
-						byte[] buf = new byte[in.available()];
-						in.read(buf);
-						v = buf;
-					} finally {
-						if(in!=null)
-							in.close();
-					}
+					v = this.toBinary(rs, i);
 				}
 			}
 			setterMethod.invoke(item, v);
+		}
+	}
+
+	private byte[] toBinary(ResultSet rs, int columnIndex) throws IOException, SQLException {
+		InputStream in = null;
+		try {
+			in = rs.getBinaryStream(columnIndex);
+			byte[] buf = new byte[in.available()];
+			in.read(buf);
+			return buf;
+		} finally {
+			if(in!=null)
+				in.close();
 		}
 	}
 
