@@ -43,11 +43,13 @@ public class GlobalHandlerMethodReturnValueHandler implements HandlerMethodRetur
 	}
 
 	private boolean notIn() {
-		String requestURI = CommonHelper.getRequest().getRequestURI();
-		for(String _uri:noWrapperUris) {
-			String uri = _uri.trim();
-			if(requestURI.startsWith(uri))
-				return false;
+		if(noWrapperUris!=null&&noWrapperUris.length>0) {
+			String requestURI = CommonHelper.getRequest().getRequestURI();
+			for(String _uri:noWrapperUris) {
+				String uri = _uri.trim();
+				if(uri.length()>0&&requestURI.startsWith(uri))
+					return false;
+			}
 		}
 		return true;
 	}

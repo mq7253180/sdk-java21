@@ -18,7 +18,7 @@ public class RetValueDecator implements InitializingBean {
     private RequestMappingHandlerAdapter adapter;
 	@Autowired
 	private ApplicationContext applicationContext;
-	@Value("#{'${uris.no-wrapper}'.split(',')}")
+	@Value("#{'${uris.no-wrapper:#{null}}'.split(',')}")
 	private String[] noWrapperUris;
 
 	@Override

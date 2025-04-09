@@ -43,7 +43,7 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 	private PublicKeyGetter publicKeyGetter;
 	@Autowired
 	private VCodeController vCodeInterceptor;
-	@Value("#{'${uris.interceptor-exclusion}'.split(',')}")
+	@Value("#{'${uris.interceptor-exclusion:#{null}}'.split(',')}")
 	private String[] flexibleExclusionUris;
 	private final static String[] FIXED_EXCLUSION_PATH_PATTERN_S = new String[] {"/static/**", "/vcode/**", "/auth/**", "/failure", "/success"};
 	private static String[] EXCLUSION_PATH_PATTERN_S = null;
@@ -94,7 +94,8 @@ public class QuincyWebMvcConfigurer implements WebMvcConfigurer {
 					if(flexibleExclusionUris!=null&&flexibleExclusionUris.length>0) {
 						for(String _uriPatten:flexibleExclusionUris) {
 							String uriPatten = _uriPatten.trim();
-							list.add(uriPatten);
+							if(uriPatten.length()>0)
+								list.add(uriPatten);
 						}
 					}
 					EXCLUSION_PATH_PATTERN_S = list.toArray(new String[] {});
