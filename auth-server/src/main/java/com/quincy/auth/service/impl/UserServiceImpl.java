@@ -129,8 +129,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public UserEntity update(UserEntity vo) {
-		UserEntity po = userRepository.findById(vo.getId()).get();
+	public UserDto update(UserDto vo) {
+		UserDto po = userDao.find(vo.getId());
+//		UserEntity po = userRepository.findById(vo.getId()).get();
 		String username = CommonHelper.trim(vo.getUsername());
 		if(username!=null)
 			po.setUsername(username);
@@ -161,7 +162,8 @@ public class UserServiceImpl implements UserService {
 		String jsessionidApp = CommonHelper.trim(vo.getJsessionidApp());
 		if(jsessionidApp!=null)
 			po.setJsessionidApp(jsessionidApp);
-		userRepository.save(po);
+//		userRepository.save(po);
+		userDao.update(po.getName(), po.getUsername(), po.getGender(), po.getPassword(), po.getMobilePhone(), po.getEmail(), po.getAvatar(), po.getJsessionidPcBrowser(), po.getMobileBrowserJsessionid(), po.getAppJsessionid(), vo.getId());
 		return po;
 	}
 
@@ -269,10 +271,11 @@ public class UserServiceImpl implements UserService {
 		loginUserMapping = loginUserMappingDao.findByLoginName(oldLoginName);
 		Assert.notNull(loginUserMapping, "开发错误：旧手机号、邮箱、用户名不存在，请检查！");
 		loginUserMappingDao.updateLoginName(newLoginName, loginUserMapping.getId());
-		UserEntity vo = new UserEntity();
+		UserDto vo = new UserDto();
 		vo.setId(loginUserMapping.getUserId());
 		userUpdation.setLoginName(vo);
-		this.userRepository.save(vo);
+//		this.userRepository.save(vo);
+		this.update(vo);
 		return new Result(1, "status.success");
 	}
 

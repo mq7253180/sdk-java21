@@ -1,6 +1,9 @@
 package com.quincy.auth.service.impl;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -10,16 +13,19 @@ import com.quincy.sdk.Result;
 import com.quincy.sdk.SnowFlake;
 import com.quincy.sdk.o.User;
 import com.quincy.auth.entity.UserDto;
-import com.quincy.auth.entity.UserEntity;
 import com.quincy.auth.service.UserService;
 import com.quincy.auth.service.UserServiceShardingProxy;
 import com.quincy.auth.service.UserUpdation;
+import com.quincy.core.InnerConstants;
 
 @Primary
 @Service
 public class UserServiceShardingImpl implements UserService {
 	@Autowired
 	private UserServiceShardingProxy userServiceShardingProxy;
+	@Autowired
+	@Qualifier(InnerConstants.BEAN_NAME_SYS_THREAD_POOL)
+	private ThreadPoolExecutor threadPoolExecutor;
 
 	@Override
 	public void loadAuth(User user) {
@@ -27,7 +33,7 @@ public class UserServiceShardingImpl implements UserService {
 	}
 
 	@Override
-	public UserEntity update(UserEntity vo) {
+	public UserDto update(UserDto vo) {
 		return this.userServiceShardingProxy.update(SnowFlake.extractShardingKey(vo.getId()), vo);
 	}
 
@@ -79,10 +85,15 @@ public class UserServiceShardingImpl implements UserService {
 	@Override
 	public void deleteMappingAndUpdateUser(String oldLoginName, UserUpdation userUpdation, Long userId) {
 		this.userServiceShardingProxy.deleteMapping(oldLoginName.hashCode(), oldLoginName);
-		UserEntity vo = new UserEntity();
+		UserDto vo = new UserDto();
 		vo.setId(userId);
 		userUpdation.setLoginName(vo);
-		this.userServiceShardingProxy.update(SnowFlake.extractShardingKey(userId), vo);
+		threadPoolExecutor.execute(new Runnable() {
+			@Override
+			public void run() {
+				userServiceShardingProxy.update(SnowFlake.extractShardingKey(userId), vo);
+			}
+		});
 	}
 
 	@Override

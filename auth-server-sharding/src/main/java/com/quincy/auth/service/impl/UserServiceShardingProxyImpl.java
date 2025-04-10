@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.quincy.auth.entity.UserDto;
-import com.quincy.auth.entity.UserEntity;
 import com.quincy.auth.service.UserServiceShardingProxy;
 import com.quincy.sdk.Client;
 import com.quincy.sdk.annotation.jdbc.ReadOnly;
@@ -23,7 +22,7 @@ public class UserServiceShardingProxyImpl extends UserServiceImpl implements Use
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED, rollbackFor = Throwable.class)
-	public UserEntity update(@ShardingKey long shardingKey, UserEntity vo) {
+	public UserDto update(@ShardingKey long shardingKey, UserDto vo) {
 		return this.update(vo);
 	}
 
