@@ -224,12 +224,10 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 					v = rs.getDouble(i);
 				} else if(BigDecimal.class.isAssignableFrom(parameterType)) {
 					v = rs.getBigDecimal(i);
-				} else if(Timestamp.class.isAssignableFrom(parameterType)) {
+				} else if(Date.class.isAssignableFrom(parameterType)||Timestamp.class.isAssignableFrom(parameterType)) {
 					v = rs.getTimestamp(i);
 				} else if(Time.class.isAssignableFrom(parameterType)) {
 					v = rs.getTime(i);
-				} else if(Date.class.isAssignableFrom(parameterType)) {
-					v = rs.getDate(i);
 				} else if(Array.class.isAssignableFrom(parameterType)) {
 					v = rs.getArray(i);
 				} else if(Blob.class.isAssignableFrom(parameterType)) {
