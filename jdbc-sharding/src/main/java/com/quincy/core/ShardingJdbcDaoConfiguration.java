@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -276,6 +277,7 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 		boolean.class.isAssignableFrom(type)||Boolean.class.isAssignableFrom(type)||
 		byte.class.isAssignableFrom(type)||Byte.class.isAssignableFrom(type)||
 		short.class.isAssignableFrom(type)||Short.class.isAssignableFrom(type)||
+		BigInteger.class.isAssignableFrom(type)||
 		Array.class.isAssignableFrom(type)||
 		Blob.class.isAssignableFrom(type)||
 		Clob.class.isAssignableFrom(type);
@@ -310,6 +312,8 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 					v = rs.getTimestamp(i);
 				} else if(Time.class.isAssignableFrom(parameterType)) {
 					v = rs.getTime(i);
+				} else if(BigInteger.class.isAssignableFrom(parameterType)) {
+					v = rs.getLong(i);
 				} else if(Array.class.isAssignableFrom(parameterType)) {
 					v = rs.getArray(i);
 				} else if(Blob.class.isAssignableFrom(parameterType)) {

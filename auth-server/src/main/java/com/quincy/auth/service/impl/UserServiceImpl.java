@@ -252,7 +252,7 @@ public class UserServiceImpl implements UserService {
 		if(loginUserMapping!=null) {
 			return null;
 		} else {
-			Long userId = utilsDao.selectAutoIncreament("b_user");
+			Long userId = utilsDao.selectAutoIncreament("b_user").longValue();
 			this.doCreateMapping(loginName, userId);
 			return userId;
 		}
