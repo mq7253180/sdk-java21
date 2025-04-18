@@ -161,9 +161,15 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 				} else if(byte[].class.isAssignableFrom(returnType)) {
 					item = this.toBinary(rs, 1);
 				} else {
-					item = returnItemType.getDeclaredConstructor().newInstance();
-					for(int i=1;i<=columnCount;i++)
-						this.loadItem(map, item, rsmd, rs, i);
+					if(this.typeSupported(returnItemType)) {// returnType == List.class
+						item = rs.getObject(1);
+					} else if(byte[].class.isAssignableFrom(returnItemType)) {// returnType == List.class
+						item = this.toBinary(rs, 1);
+					} else {
+						item = returnItemType.getDeclaredConstructor().newInstance();
+						for(int i=1;i<=columnCount;i++)
+							this.loadItem(map, item, rsmd, rs, i);
+					}
 				}
 				if(returnDto) {
 					return item;
