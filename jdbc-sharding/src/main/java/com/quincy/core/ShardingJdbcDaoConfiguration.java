@@ -180,61 +180,23 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 								statment.setObject(j+1, args[j]);
 						}
 						rs = statment.executeQuery();
+						ResultSetMetaData rsmd = rs.getMetaData();
+						int columnCount = rsmd.getColumnCount();
 						while(rs.next()) {
-							Object item = returnItemType.getDeclaredConstructor().newInstance();
-							ResultSetMetaData rsmd = rs.getMetaData();
-							int columnCount = rsmd.getColumnCount();
-							for(int j=1;j<=columnCount;j++) {
-								String columnName = rsmd.getColumnLabel(j);
-								Method setterMethod = map.get(columnName);
-								if(setterMethod!=null) {
-									Object v = rs.getObject(j);
-									Class<?> parameterType = setterMethod.getParameterTypes()[0];
-									if(!parameterType.isInstance(v)) {
-										if(String.class.isAssignableFrom(parameterType)) {
-											v = rs.getString(j);
-										} else if(boolean.class.isAssignableFrom(parameterType)||Boolean.class.isAssignableFrom(parameterType)) {
-											v = rs.getBoolean(j);
-										} else if(byte.class.isAssignableFrom(parameterType)||Byte.class.isAssignableFrom(parameterType)) {
-											v = rs.getByte(j);
-										} else if(short.class.isAssignableFrom(parameterType)||Short.class.isAssignableFrom(parameterType)) {
-											v = rs.getShort(j);
-										} else if(int.class.isAssignableFrom(parameterType)||Integer.class.isAssignableFrom(parameterType)) {
-											v = rs.getInt(j);
-										} else if(long.class.isAssignableFrom(parameterType)||Long.class.isAssignableFrom(parameterType)) {
-											v = rs.getLong(j);
-										} else if(float.class.isAssignableFrom(parameterType)||Float.class.isAssignableFrom(parameterType)) {
-											v = rs.getFloat(j);
-										} else if(double.class.isAssignableFrom(parameterType)||Double.class.isAssignableFrom(parameterType)) {
-											v = rs.getDouble(j);
-										} else if(BigDecimal.class.isAssignableFrom(parameterType)) {
-											v = rs.getBigDecimal(j);
-										} else if(Timestamp.class.isAssignableFrom(parameterType)) {
-											v = rs.getTimestamp(j);
-										} else if(Time.class.isAssignableFrom(parameterType)) {
-											v = rs.getTime(j);
-										} else if(Date.class.isAssignableFrom(parameterType)) {
-											v = rs.getDate(j);
-										} else if(Array.class.isAssignableFrom(parameterType)) {
-											v = rs.getArray(j);
-										} else if(Blob.class.isAssignableFrom(parameterType)) {
-											v = rs.getBlob(j);
-										} else if(Clob.class.isAssignableFrom(parameterType)) {
-											v = rs.getClob(j);
-										} else if(byte[].class.isAssignableFrom(parameterType)) {
-											InputStream in = null;
-											try {
-												in = rs.getBinaryStream(j);
-												byte[] buf = new byte[in.available()];
-												in.read(buf);
-												v = buf;
-											} finally {
-												if(in!=null)
-													in.close();
-											}
-										}
-									}
-									setterMethod.invoke(item, v);
+							Object item = null;
+							if(typeSupported(returnType)) {
+								item = rs.getObject(1);
+							} else if(byte[].class.isAssignableFrom(returnType)) {
+								item = toBinary(rs, 1);
+							} else {
+								if(typeSupported(returnItemType)) {// returnType == List.class
+									item = rs.getObject(1);
+								} else if(byte[].class.isAssignableFrom(returnItemType)) {// returnType == List.class
+									item = toBinary(rs, 1);
+								} else {
+									item = returnItemType.getDeclaredConstructor().newInstance();
+									for(int i=1;i<=columnCount;i++)
+										loadItem(map, item, rsmd, rs, i);
 								}
 							}
 							list.add(item);
@@ -298,6 +260,80 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 				lists[i] = task.get();
 			}
 			return lists;
+		}
+	}
+
+	private boolean typeSupported(Class<?> type) {
+		return int.class.isAssignableFrom(type)||Integer.class.isAssignableFrom(type)||
+		long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||
+		String.class.isAssignableFrom(type)||
+		BigDecimal.class.isAssignableFrom(type)||
+		Date.class.isAssignableFrom(type)||
+		Timestamp.class.isAssignableFrom(type)||
+		Time.class.isAssignableFrom(type)||
+		float.class.isAssignableFrom(type)||Float.class.isAssignableFrom(type)||
+		double.class.isAssignableFrom(type)||Double.class.isAssignableFrom(type)||
+		boolean.class.isAssignableFrom(type)||Boolean.class.isAssignableFrom(type)||
+		byte.class.isAssignableFrom(type)||Byte.class.isAssignableFrom(type)||
+		short.class.isAssignableFrom(type)||Short.class.isAssignableFrom(type)||
+		Array.class.isAssignableFrom(type)||
+		Blob.class.isAssignableFrom(type)||
+		Clob.class.isAssignableFrom(type);
+	}
+
+	private void loadItem(Map<String, Method> map, Object item, ResultSetMetaData rsmd, ResultSet rs, int i) throws SQLException, IOException, IllegalAccessException, InvocationTargetException {
+		String columnName = rsmd.getColumnLabel(i);
+		Method setterMethod = map.get(columnName);
+		if(setterMethod!=null) {
+			Class<?> parameterType = setterMethod.getParameterTypes()[0];
+			Object v = rs.getObject(i);
+			if(!parameterType.isInstance(v)) {
+				if(String.class.isAssignableFrom(parameterType)) {
+					v = rs.getString(i);
+				} else if(boolean.class.isAssignableFrom(parameterType)||Boolean.class.isAssignableFrom(parameterType)) {
+					v = rs.getBoolean(i);
+				} else if(byte.class.isAssignableFrom(parameterType)||Byte.class.isAssignableFrom(parameterType)) {
+					v = rs.getByte(i);
+				} else if(short.class.isAssignableFrom(parameterType)||Short.class.isAssignableFrom(parameterType)) {
+					v = rs.getShort(i);
+				} else if(int.class.isAssignableFrom(parameterType)||Integer.class.isAssignableFrom(parameterType)) {
+					v = rs.getInt(i);
+				} else if(long.class.isAssignableFrom(parameterType)||Long.class.isAssignableFrom(parameterType)) {
+					v = rs.getLong(i);
+				} else if(float.class.isAssignableFrom(parameterType)||Float.class.isAssignableFrom(parameterType)) {
+					v = rs.getFloat(i);
+				} else if(double.class.isAssignableFrom(parameterType)||Double.class.isAssignableFrom(parameterType)) {
+					v = rs.getDouble(i);
+				} else if(BigDecimal.class.isAssignableFrom(parameterType)) {
+					v = rs.getBigDecimal(i);
+				} else if(Date.class.isAssignableFrom(parameterType)||Timestamp.class.isAssignableFrom(parameterType)) {
+					v = rs.getTimestamp(i);
+				} else if(Time.class.isAssignableFrom(parameterType)) {
+					v = rs.getTime(i);
+				} else if(Array.class.isAssignableFrom(parameterType)) {
+					v = rs.getArray(i);
+				} else if(Blob.class.isAssignableFrom(parameterType)) {
+					v = rs.getBlob(i);
+				} else if(Clob.class.isAssignableFrom(parameterType)) {
+					v = rs.getClob(i);
+				} else if(byte[].class.isAssignableFrom(parameterType)) {
+					v = this.toBinary(rs, i);
+				}
+			}
+			setterMethod.invoke(item, v);
+		}
+	}
+
+	private byte[] toBinary(ResultSet rs, int columnIndex) throws IOException, SQLException {
+		InputStream in = null;
+		try {
+			in = rs.getBinaryStream(columnIndex);
+			byte[] buf = new byte[in.available()];
+			in.read(buf);
+			return buf;
+		} finally {
+			if(in!=null)
+				in.close();
 		}
 	}
 
