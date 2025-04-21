@@ -262,7 +262,7 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 
 	private boolean typeSupported(Class<?> type) {
 		return int.class.isAssignableFrom(type)||Integer.class.isAssignableFrom(type)||
-		long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||
+		long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||BigInteger.class.isAssignableFrom(type)||
 		String.class.isAssignableFrom(type)||
 		BigDecimal.class.isAssignableFrom(type)||
 		Date.class.isAssignableFrom(type)||Timestamp.class.isAssignableFrom(type)||
@@ -272,10 +272,10 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 		boolean.class.isAssignableFrom(type)||Boolean.class.isAssignableFrom(type)||
 		byte.class.isAssignableFrom(type)||Byte.class.isAssignableFrom(type)||
 		short.class.isAssignableFrom(type)||Short.class.isAssignableFrom(type)||
-		BigInteger.class.isAssignableFrom(type)||
 		Array.class.isAssignableFrom(type)||
 		Blob.class.isAssignableFrom(type)||
-		Clob.class.isAssignableFrom(type);
+		Clob.class.isAssignableFrom(type)||
+		byte[].class.isAssignableFrom(type);
 	}
 
 	private Object toObjectByType(ResultSet rs, int columnIndex, Class<?> type) throws SQLException, IOException {
@@ -291,7 +291,7 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 				v = rs.getShort(columnIndex);
 			} else if(int.class.isAssignableFrom(type)||Integer.class.isAssignableFrom(type)) {
 				v = rs.getInt(columnIndex);
-			} else if(long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)) {
+			} else if(long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||BigInteger.class.isAssignableFrom(type)) {
 				v = rs.getLong(columnIndex);
 			} else if(float.class.isAssignableFrom(type)||Float.class.isAssignableFrom(type)) {
 				v = rs.getFloat(columnIndex);
@@ -303,8 +303,6 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 				v = rs.getTimestamp(columnIndex);
 			} else if(Time.class.isAssignableFrom(type)) {
 				v = rs.getTime(columnIndex);
-			} else if(BigInteger.class.isAssignableFrom(type)) {
-				v = rs.getLong(columnIndex);
 			} else if(Array.class.isAssignableFrom(type)) {
 				v = rs.getArray(columnIndex);
 			} else if(Blob.class.isAssignableFrom(type)) {
