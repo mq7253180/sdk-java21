@@ -189,8 +189,7 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 		long.class.isAssignableFrom(type)||Long.class.isAssignableFrom(type)||
 		String.class.isAssignableFrom(type)||
 		BigDecimal.class.isAssignableFrom(type)||
-		Date.class.isAssignableFrom(type)||
-		Timestamp.class.isAssignableFrom(type)||
+		Date.class.isAssignableFrom(type)||Timestamp.class.isAssignableFrom(type)||
 		Time.class.isAssignableFrom(type)||
 		float.class.isAssignableFrom(type)||Float.class.isAssignableFrom(type)||
 		double.class.isAssignableFrom(type)||Double.class.isAssignableFrom(type)||
