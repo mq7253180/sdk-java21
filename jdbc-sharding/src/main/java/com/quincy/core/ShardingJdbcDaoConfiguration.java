@@ -160,6 +160,8 @@ public class ShardingJdbcDaoConfiguration implements BeanDefinitionRegistryPostP
 			throws SQLException, IOException, InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException, ExecutionException {
 		Map<String, Method> map = classMethodMap.get(returnItemType);
+		if(!this.typeSupported(returnItemType))
+			Assert.isTrue(map!=null, returnItemType.getName()+" must be marked by @DTO.");
 		int shardCount = dataSource.getResolvedDataSources().size()>>1;
 		boolean returnDto = returnType.getName().equals(returnItemType.getName());
 		List<FutureTask<List<Object>>> tasks = new ArrayList<>(shardCount);
