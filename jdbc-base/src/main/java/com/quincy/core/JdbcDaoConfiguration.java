@@ -138,7 +138,7 @@ public class JdbcDaoConfiguration implements BeanDefinitionRegistryPostProcessor
 		if(!returnDto)
 			list = new ArrayList<>();
 		Map<String, Method> map = classMethodMap.get(returnItemType);
-		if(!this.typeSupported(returnItemType)&&!byte[].class.isAssignableFrom(returnItemType))
+		if(!this.typeSupported(returnItemType))
 			Assert.isTrue(map!=null, returnItemType.getName()+" must be marked by @DTO.");
 		Connection conn = null;
 		PreparedStatement statement = null;
