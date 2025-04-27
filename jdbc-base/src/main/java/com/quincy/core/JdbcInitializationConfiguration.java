@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import com.quincy.sdk.annotation.jdbc.DynamicColumns;
 import com.quincy.sdk.annotation.jdbc.DynamicFields;
 import com.quincy.sdk.annotation.jdbc.Result;
 
-import jakarta.annotation.PostConstruct;
+//import jakarta.annotation.PostConstruct;
 
 @PropertySource("classpath:application-jdbc.properties")
 @Configuration
