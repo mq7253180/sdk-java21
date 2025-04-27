@@ -15,8 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.quincy.core.db.RoutingDataSource;
 
-//import jakarta.annotation.PostConstruct;
-
 @Configuration
 public class ShardingJdbcInitializationConfiguration {
 	@Autowired
