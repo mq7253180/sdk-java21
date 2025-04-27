@@ -28,7 +28,7 @@ import com.quincy.sdk.annotation.jdbc.Result;
 //import jakarta.annotation.PostConstruct;
 
 @PropertySource("classpath:application-jdbc.properties")
-@Configuration
+@Configuration(JdbcHolder.INIT_CONFIGURATION_BEAN_NAME)
 public class JdbcInitializationConfiguration {
 	@Autowired
 	private DataSource dataSource;

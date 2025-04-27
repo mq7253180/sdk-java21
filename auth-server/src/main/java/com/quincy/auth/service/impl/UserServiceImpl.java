@@ -16,12 +16,10 @@ import org.springframework.util.Assert;
 
 import com.quincy.auth.dao.LoginUserMappingDao;
 import com.quincy.auth.dao.UserDao;
-import com.quincy.auth.dao.UserRepository;
 import com.quincy.auth.entity.LoginUserMapping;
 import com.quincy.auth.entity.Permission;
 import com.quincy.auth.entity.Role;
 import com.quincy.auth.entity.UserDto;
-import com.quincy.auth.entity.UserEntity;
 import com.quincy.auth.service.UserService;
 import com.quincy.auth.service.UserUpdation;
 import com.quincy.core.dao.UtilsDao;
@@ -37,8 +35,6 @@ import com.quincy.sdk.o.User;
 public class UserServiceImpl implements UserService {
 	@Autowired
 	protected LoginUserMappingDao loginUserMappingDao;
-	@Autowired
-	protected UserRepository userRepository;
 	@Autowired
 	private UtilsDao utilsDao;
 	@Autowired
@@ -203,26 +199,6 @@ public class UserServiceImpl implements UserService {
 			user.setJsessionid(entity.getMobileBrowserJsessionid());
 		else if(client.isApp())
 			user.setJsessionid(entity.getAppJsessionid());
-		return user;
-	}
-
-	protected User toUser(UserEntity entity, Client client) {
-		User user = new User();
-		user.setId(entity.getId());
-		user.setCreationTime(entity.getCreationTime());
-		user.setName(entity.getName());
-		user.setUsername(entity.getUsername());
-		user.setMobilePhone(entity.getMobilePhone());
-		user.setEmail(entity.getEmail());
-		user.setPassword(entity.getPassword());
-		user.setGender(entity.getGender());
-		user.setAvatar(entity.getAvatar());
-		if(client.isPc())
-			user.setJsessionid(entity.getJsessionidPcBrowser());
-		else if(client.isMobile())
-			user.setJsessionid(entity.getJsessionidMobileBrowser());
-		else if(client.isApp())
-			user.setJsessionid(entity.getJsessionidPcBrowser());
 		return user;
 	}
 
