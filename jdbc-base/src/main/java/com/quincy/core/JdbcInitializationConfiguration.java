@@ -25,8 +25,6 @@ import com.quincy.sdk.annotation.jdbc.DynamicColumns;
 import com.quincy.sdk.annotation.jdbc.DynamicFields;
 import com.quincy.sdk.annotation.jdbc.Result;
 
-//import jakarta.annotation.PostConstruct;
-
 @PropertySource("classpath:application-jdbc.properties")
 @Configuration(JdbcHolder.INIT_CONFIGURATION_BEAN_NAME)
 public class JdbcInitializationConfiguration {
