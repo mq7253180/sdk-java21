@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.quincy.core.db.RoutingDataSource;
 
-@Configuration
+@Configuration(ShardingJdbcHolder.INIT_CONFIGURATION_BEAN_NAME)
 public class ShardingJdbcInitializationConfiguration {
 	@Autowired
 	private DataSource dataSource;
