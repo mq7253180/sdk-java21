@@ -25,7 +25,7 @@ public class GlobalHandlerExceptionResolver {//implements HandlerExceptionResolv
 		boolean self = e instanceof SelfException;
 		if(self) {
 			msg = e.getMessage();
-			viewName += "self_";
+			viewName += "self_exception_";
 		} else {
 			RequestContext requestContext = new RequestContext(request);
 			msg = requestContext.getMessage(Result.I18N_KEY_EXCEPTION);
