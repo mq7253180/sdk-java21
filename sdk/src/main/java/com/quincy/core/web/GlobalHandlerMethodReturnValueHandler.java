@@ -14,11 +14,13 @@ public class GlobalHandlerMethodReturnValueHandler implements HandlerMethodRetur
 	private HandlerMethodReturnValueHandler origin;
 	private ApplicationContext applicationContext;
 	private String[] noWrapperUris;
+	private boolean noInnerWrapper = false;
 
-	public GlobalHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler origin, ApplicationContext applicationContext, String[] noWrapperUris) {
+	public GlobalHandlerMethodReturnValueHandler(HandlerMethodReturnValueHandler origin, ApplicationContext applicationContext, String[] noWrapperUris, boolean noInnerWrapper) {
 		this.origin = origin;
 		this.applicationContext = applicationContext;
 		this.noWrapperUris = noWrapperUris;
+		this.noInnerWrapper = noInnerWrapper;
 	}
 
 	@Override
@@ -32,7 +34,7 @@ public class GlobalHandlerMethodReturnValueHandler implements HandlerMethodRetur
 		DoNotWrap doNotWrap = returnType.getMethod().getDeclaredAnnotation(DoNotWrap.class);
 		if(doNotWrap==null&&notIn()) {
 			Result result = null;
-			if(returnValue instanceof Result) {
+			if(noInnerWrapper&&returnValue instanceof Result) {
 				result = (Result)returnValue;
 			} else {
 				result = Result.newSuccess();
